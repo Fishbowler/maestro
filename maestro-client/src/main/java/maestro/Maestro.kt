@@ -453,6 +453,7 @@ class Maestro(private val driver: Driver) : AutoCloseable {
     }
 
     fun waitForAppToSettle(initialHierarchy: ViewHierarchy? = null, appId: String? = null): ViewHierarchy? {
+        LOGGER.info("Waiting for app to settle")
         return driver.waitForAppToSettle(initialHierarchy, appId)
     }
 

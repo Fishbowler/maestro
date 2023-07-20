@@ -38,6 +38,7 @@ class ScreenshotUtils {
         fun waitForAppToSettle(initialHierarchy: ViewHierarchy?, driver: Driver): ViewHierarchy {
             var latestHierarchy = initialHierarchy ?: viewHierarchy(driver)
             repeat(10) {
+                LOGGER.info("Checking whether hierarchy has is-loading attribute")
                 val hierarchyAfter = viewHierarchy(driver)
                 if (latestHierarchy == hierarchyAfter) {
                     val isLoading = latestHierarchy.root.attributes.getOrDefault("is-loading", "false").toBoolean()

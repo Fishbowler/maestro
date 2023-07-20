@@ -542,14 +542,17 @@ class AndroidDriver(
     }
 
     private fun waitForWindowToSettle(appId: String, initialHierarchy: ViewHierarchy?): ViewHierarchy {
+        LOGGER.info("Waiting for window to settle: {}", appId)
         val endTime = System.currentTimeMillis() + WINDOW_UPDATE_TIMEOUT_MS
 
         do {
             if (blockingStub.isWindowUpdating(checkWindowUpdatingRequest { this.appId = appId }).isWindowUpdating) {
+                LOGGER.info("Waiting for app to settle whilst window is updating: {}", appId)
                 ScreenshotUtils.waitForAppToSettle(initialHierarchy, this)
             }
         } while (System.currentTimeMillis() < endTime)
 
+        LOGGER.info("Done waiting for app to settle whilst window is updating: {}", appId)
         return ScreenshotUtils.waitForAppToSettle(initialHierarchy, this)
     }
 
