@@ -20,6 +20,7 @@
 package xcuitest.api
 
 data class DeviceInfo(
+    val platformVersion: String,
     val widthPixels: Int,
     val heightPixels: Int,
     val widthPoints: Int,

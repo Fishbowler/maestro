@@ -21,6 +21,7 @@ package maestro
 
 data class DeviceInfo(
     val platform: Platform,
+    val platformVersion: String,
     val widthPixels: Int,
     val heightPixels: Int,
     val widthGrid: Int,

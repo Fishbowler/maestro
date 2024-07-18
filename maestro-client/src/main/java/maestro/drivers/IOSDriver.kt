@@ -76,6 +76,7 @@ class IOSDriver(
         return runDeviceCall {
             DeviceInfo(
                 platform = Platform.IOS,
+                platformVersion = deviceInfo.platformVersion,
                 widthPixels = deviceInfo.widthPixels,
                 heightPixels = deviceInfo.heightPixels,
                 widthGrid = deviceInfo.widthPoints,

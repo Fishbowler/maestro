@@ -360,6 +360,7 @@ class ApiClient(
             val deviceInfo = deviceInfoStr?.let {
                 DeviceInfo(
                     platform = it["platform"] as String,
+                    platformVersion = it["platformVersion"] as String,
                     displayInfo = it["displayInfo"] as String,
                     isDefaultOsVersion = it["isDefaultOsVersion"] as Boolean,
                     deviceLocale = responseBody["deviceLocale"] as String
@@ -432,6 +433,7 @@ data class UploadResponse(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class DeviceInfo(
     val platform: String,
+    val platformVersion: String,
     val displayInfo: String,
     val isDefaultOsVersion: Boolean,
     val deviceLocale: String,

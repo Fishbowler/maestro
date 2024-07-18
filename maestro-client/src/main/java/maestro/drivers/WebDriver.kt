@@ -133,6 +133,7 @@ class WebDriver(val isStudio: Boolean) : Driver {
 
         return DeviceInfo(
             platform = Platform.WEB,
+            platformVersion = "n/a",
             widthPixels = windowSize.width,
             heightPixels = windowSize.height,
             widthGrid = windowSize.width,

@@ -86,7 +86,7 @@ class XCTestDriverClientTest {
         // given
         val mockWebServer = MockWebServer()
         val mapper = jacksonObjectMapper()
-        val expectedDeviceInfo = DeviceInfo(1123, 5000, 1223, 1123)
+        val expectedDeviceInfo = DeviceInfo("1.2.3", 1123, 5000, 1223, 1123)
         val mockResponse = MockResponse().apply {
             setResponseCode(200)
             setBody(mapper.writeValueAsString(expectedDeviceInfo))

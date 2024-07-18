@@ -158,6 +158,7 @@ class Service(
 
             responseObserver.onNext(
                 deviceInfo {
+                    platformVersion = Build.VERSION.SDK_INT
                     widthPixels = displayMetrics.widthPixels
                     heightPixels = displayMetrics.heightPixels
                 }

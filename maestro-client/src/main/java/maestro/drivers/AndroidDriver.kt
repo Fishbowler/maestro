@@ -181,6 +181,7 @@ class AndroidDriver(
 
             DeviceInfo(
                 platform = Platform.ANDROID,
+                platformVersion = response.platformVersion,
                 widthPixels = response.widthPixels,
                 heightPixels = response.heightPixels,
                 widthGrid = response.widthPixels,
