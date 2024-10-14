@@ -92,7 +92,7 @@ object WorkspaceExecutionPlanner {
 
         val configPerFlowFile = unsortedFlowFiles.associateWith {
             val commands = validateFlowFile(it)
-            YamlCommandReader.getConfig(commands)
+            YamlCommandReader.getConfig(commands)?.applyWorkspaceDefaults(workspaceConfig)
         }
 
         val allIncludeTags = includeTags + (workspaceConfig.includeTags?.toList() ?: emptyList())

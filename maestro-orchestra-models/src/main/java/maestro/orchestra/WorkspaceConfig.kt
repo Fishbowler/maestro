@@ -8,12 +8,13 @@ data class WorkspaceConfig(
     val includeTags: StringList? = null,
     val excludeTags: StringList? = null,
     val local: Local? = null,
-    val executionOrder: ExecutionOrder? = null
+    val executionOrder: ExecutionOrder? = null,
+    val potentialFlowDefaults: MutableMap<String, Any?> = mutableMapOf<String, Any?>()
 ) {
 
     @JsonAnySetter
     fun setOtherField(key: String, other: Any?) {
-        // Do nothing
+        potentialFlowDefaults[key] = other
     }
 
     @Deprecated("Use ExecutionOrder instead")

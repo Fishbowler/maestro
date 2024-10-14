@@ -12,7 +12,7 @@ import java.nio.file.Path
 data class YamlConfig(
     val name: String?,
     @JsonAlias("url")
-    val appId: String,
+    val appId: String?,
     val tags: List<String>? = emptyList(),
     val env: Map<String, String> = emptyMap(),
     val onFlowStart: YamlOnFlowStart?,
@@ -39,12 +39,14 @@ data class YamlConfig(
 
     private fun onFlowComplete(flowPath: Path): MaestroOnFlowComplete? {
         if (onFlowComplete == null) return null
+        if (appId == null) return null
 
         return MaestroOnFlowComplete(onFlowComplete.commands.flatMap { it.toCommands(flowPath, appId) })
     }
 
     private fun onFlowStart(flowPath: Path): MaestroOnFlowStart? {
         if (onFlowStart == null) return null
+        if (appId == null) return null
 
         return MaestroOnFlowStart(onFlowStart.commands.flatMap { it.toCommands(flowPath, appId) })
     }

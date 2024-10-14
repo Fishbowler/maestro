@@ -23,6 +23,19 @@ data class MaestroConfig(
         )
     }
 
+    fun applyWorkspaceDefaults(workspaceConfig: WorkspaceConfig): MaestroConfig {
+        val potentialFlowDefaults = workspaceConfig.potentialFlowDefaults
+        return copy(
+            appId = (appId ?: (potentialFlowDefaults["appId"] as String).firstOrNull()).toString(),
+            ext = ext.mapValues {
+                if(it.key == "jsEngine") {
+                    it.value ?: (potentialFlowDefaults[it.key] as String).firstOrNull()
+                } else {
+                    it.value
+                }
+            }
+        )
+    }
 }
 
 data class MaestroOnFlowComplete(val commands: List<MaestroCommand>) {
