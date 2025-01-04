@@ -189,7 +189,7 @@ class CloudCommand : Callable<Int> {
 
         env = env
             .withInjectedShellEnvVars()
-            .withDefaultEnvVars(flowsFile)
+            .withDefaultEnvVars(flowFile = flowsFile)
 
         return CloudInteractor(
             client = ApiClient(apiUrl),

@@ -92,7 +92,7 @@ class UploadCommand : Callable<Int> {
 
         env = env
             .withInjectedShellEnvVars()
-            .withDefaultEnvVars(flowFile)
+            .withDefaultEnvVars(flowFile = flowFile)
 
         return CloudInteractor(
             client = ApiClient(apiUrl),

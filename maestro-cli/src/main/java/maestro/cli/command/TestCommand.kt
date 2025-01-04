@@ -347,7 +347,7 @@ class TestCommand : Callable<Int> {
 
         env = env
             .withInjectedShellEnvVars()
-            .withDefaultEnvVars(flowFile)
+            .withDefaultEnvVars(flowFile = flowFile, deviceId = (device as Device.Connected?)?.instanceId)
 
         val resultSingle = TestRunner.runSingle(
             maestro = maestro,

@@ -71,7 +71,7 @@ class TestSuiteInteractor(
             val flowFile = flow.toFile()
             val updatedEnv = env
                 .withInjectedShellEnvVars()
-                .withDefaultEnvVars(flowFile)
+                .withDefaultEnvVars(flowFile = flowFile, deviceId = (device as Device.Connected?)?.instanceId, shardIndex = shardIndex)
             val (result, aiOutput) = runFlow(flowFile, updatedEnv, maestro, debugOutputPath)
             flowResults.add(result)
             aiOutputs.add(aiOutput)

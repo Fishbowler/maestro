@@ -34,9 +34,13 @@ object Env {
             .filterKeys { it.startsWith("MAESTRO_") && this.containsKey(it).not() }
             .filterValues { it != null && it.isNotEmpty() }
 
-    fun Map<String, String>.withDefaultEnvVars(flowFile: File? = null): Map<String, String> {
+    fun Map<String, String>.withDefaultEnvVars(flowFile: File? = null, deviceId: String? = null, shardIndex: Int? = null): Map<String, String> {
         val defaultEnvVars = mutableMapOf<String, String>()
+
         flowFile?.nameWithoutExtension?.let { defaultEnvVars["MAESTRO_FILENAME"] = it }
+        deviceId?.let { defaultEnvVars["MAESTRO_DEVICE_ID"] = it }
+        shardIndex?.let { defaultEnvVars["MAESTRO_SHARD_INDEX"] = it.toString() }
+
         return if (defaultEnvVars.isEmpty()) this
         else this + defaultEnvVars
     }

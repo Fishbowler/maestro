@@ -29,6 +29,43 @@ class EnvTest {
     }
 
     @Test
+    fun `withDefaultEnvVars should add deviceId when provided`() {
+        val deviceId = "device-1234"
+        val env = emptyEnv.withDefaultEnvVars(deviceId = deviceId)
+        assertThat(env["MAESTRO_DEVICE_ID"]).isEqualTo(deviceId)
+    }
+
+    @Test
+    fun `withDefaultEnvVars should not add deviceId when not provided`() {
+        val env = emptyEnv.withDefaultEnvVars()
+        assertThat(env).doesNotContainKey("MAESTRO_DEVICE_ID")
+    }
+
+    @Test
+    fun `withDefaultEnvVars should add shardId when provided`() {
+        val shardId = 2
+        val env = emptyEnv.withDefaultEnvVars(shardIndex = shardId)
+        assertThat(env["MAESTRO_SHARD_INDEX"]).isEqualTo(shardId.toString())
+    }
+
+    @Test
+    fun `withDefaultEnvVars should not add shardId when not provided`() {
+        val env = emptyEnv.withDefaultEnvVars()
+        assertThat(env).doesNotContainKey("MAESTRO_SHARD_INDEX")
+    }
+
+    @Test
+    fun `withDefaultEnvVars should populate all vars when provided`() {
+        val flowFile = File("myFlow.yml")
+        val deviceId = "device-1234"
+        val shardId = 2
+        val env = emptyEnv.withDefaultEnvVars(flowFile, deviceId, shardId)
+        assertThat(env["MAESTRO_FILENAME"]).isEqualTo("myFlow")
+        assertThat(env["MAESTRO_DEVICE_ID"]).isEqualTo(deviceId)
+        assertThat(env["MAESTRO_SHARD_INDEX"]).isEqualTo(shardId.toString())
+    }
+
+    @Test
     fun `withInjectedShellEnvVars only keeps MAESTRO_ vars`() {
         val env = emptyEnv.withInjectedShellEnvVars()
         assertThat(env.filterKeys { it.startsWith("MAESTRO_").not() }).isEmpty()
