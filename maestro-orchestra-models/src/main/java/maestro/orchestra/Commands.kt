@@ -580,7 +580,7 @@ data class PressKeyCommand(
 }
 
 data class EraseTextCommand(
-    val charactersToErase: Int?,
+    val charactersToErase: String?,
     override val label: String? = null,
     override val optional: Boolean = false,
 ) : Command {
@@ -596,7 +596,9 @@ data class EraseTextCommand(
     }
 
     override fun evaluateScripts(jsEngine: JsEngine): EraseTextCommand {
-        return this
+        return copy(
+            charactersToErase = charactersToErase?.evaluateScripts(jsEngine),
+        )
     }
 
 }

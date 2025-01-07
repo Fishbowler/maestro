@@ -270,7 +270,7 @@ class Service(
         responseObserver: StreamObserver<MaestroAndroid.EraseAllTextResponse>
     ) {
         try {
-            val charactersToErase = request.charactersToErase
+            val charactersToErase = request.charactersToErase.toInt()
             Log.d("Maestro", "Erasing text $charactersToErase")
 
             for (i in 0..charactersToErase) {
