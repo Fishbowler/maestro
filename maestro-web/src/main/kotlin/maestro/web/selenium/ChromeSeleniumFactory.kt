@@ -27,6 +27,8 @@ class ChromeSeleniumFactory(
             ChromeOptions().apply {
                 addArguments("--remote-allow-origins=*")
                 addArguments("--disable-search-engine-choice-screen")
+                addArguments("--disable-blink-features");
+                addArguments("--disable-blink-features=AutomationControlled");
                 addArguments("--lang=en")
                 if (isHeadless) {
                     addArguments("--headless=new")
