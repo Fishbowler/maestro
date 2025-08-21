@@ -24,6 +24,7 @@ import maestro.orchestra.util.Env.withEnv
 import maestro.orchestra.util.Env.withDefaultEnvVars
 import maestro.orchestra.util.Env.withInjectedShellEnvVars
 import maestro.orchestra.yaml.YamlCommandReader
+import maestro.utils.FlowMeta
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
@@ -66,14 +67,22 @@ object TestRunner {
             val commands = YamlCommandReader.readCommands(flowFile.toPath())
                 .withEnv(updatedEnv)
 
-            val flowName = YamlCommandReader.getConfig(commands)?.name ?: flowFile.nameWithoutExtension
-            aiOutput = aiOutput.copy(flowName = flowName)
+            val flowMeta = FlowMeta(
+                name = flowFile.nameWithoutExtension,
+                fileName = flowFile.name,
+            )
+
+            val flowName = YamlCommandReader.getConfig(commands)?.name
+            if (flowName != null) {
+                aiOutput = aiOutput.copy(flowName = flowName)
+                flowMeta.name = flowName
+            }
 
             logger.info("Running flow ${flowFile.name}...")
 
             runBlocking {
                 MaestroCommandRunner.runCommands(
-                    flowName = flowName,
+                    flowMeta = flowMeta,
                     maestro = maestro,
                     device = device,
                     view = resultView,
@@ -149,6 +158,11 @@ object TestRunner {
 
                 val flowName = YamlCommandReader.getConfig(commands)?.name
 
+                val flowMeta = FlowMeta(
+                    name = flowName ?: flowFile.nameWithoutExtension,
+                    fileName = flowFile.name,
+                )
+
                 // Restart the flow if anything has changed
                 if (commands != previousCommands) {
                     ongoingTest = thread {
@@ -157,7 +171,7 @@ object TestRunner {
                         runCatching(resultView, maestro) {
                             runBlocking {
                                 MaestroCommandRunner.runCommands(
-                                    flowName = flowName ?: flowFile.nameWithoutExtension,
+                                    flowMeta = flowMeta,
                                     maestro = maestro,
                                     device = device,
                                     view = resultView,

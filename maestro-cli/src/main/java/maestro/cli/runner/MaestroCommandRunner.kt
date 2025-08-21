@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.IdentityHashMap
 import maestro.cli.util.ScreenshotUtils
+import maestro.utils.FlowMeta
 import maestro.utils.Insight
 import java.nio.file.Path
 
@@ -53,7 +54,7 @@ object MaestroCommandRunner {
     private val logger = LoggerFactory.getLogger(MaestroCommandRunner::class.java)
 
     suspend fun runCommands(
-        flowName: String,
+        flowMeta: FlowMeta,
         maestro: Maestro,
         device: Device?,
         view: ResultView,
@@ -74,7 +75,7 @@ object MaestroCommandRunner {
         fun refreshUi() {
             view.setState(
                 UiState.Running(
-                    flowName = flowName,
+                    flowName = flowMeta.name,
                     device = device,
                     onFlowStartCommands = toCommandStates(
                         onFlowStart?.commands ?: emptyList(),
@@ -193,7 +194,7 @@ object MaestroCommandRunner {
             apiKey = apiKey,    
         )
 
-        val flowSuccess = orchestra.runFlow(commands)
+        val flowSuccess = orchestra.runFlow(commands, flowMeta)
 
         // Warn users about deprecated Rhino JS engine
         val isRhinoExplicitlyRequested = config?.ext?.get("jsEngine") == "rhino"

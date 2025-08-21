@@ -28,6 +28,7 @@ import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.seconds
 import maestro.cli.util.ScreenshotUtils
+import maestro.utils.FlowMeta
 import maestro.orchestra.util.Env.withDefaultEnvVars
 import maestro.orchestra.util.Env.withInjectedShellEnvVars
 
@@ -160,6 +161,12 @@ class TestSuiteInteractor(
         //  (i.e. consider them also part of the test output)
         //  See #1973
 
+        var flowMeta: FlowMeta = FlowMeta(
+            name = flowFile.nameWithoutExtension,
+            fileName = flowFile.name,
+        )
+        var flowName: String = flowFile.nameWithoutExtension
+        var flowFileName = flowFile.name
         var flowStatus: FlowStatus
         var errorMessage: String? = null
 
@@ -178,7 +185,7 @@ class TestSuiteInteractor(
 
         val flowTimeMillis = measureTimeMillis {
             try {
-                YamlCommandReader.getConfig(commands)?.name?.let { flowName = it }
+                YamlCommandReader.getConfig(commands)?.name?.let { flowMeta.name = it }
 
                 val orchestra = Orchestra(
                     maestro = maestro,
@@ -239,7 +246,7 @@ class TestSuiteInteractor(
                     }
                 )
 
-                val flowSuccess = orchestra.runFlow(commands)
+                val flowSuccess = orchestra.runFlow(commands, flowMeta)
                 flowStatus = if (flowSuccess) FlowStatus.SUCCESS else FlowStatus.ERROR
             } catch (e: Exception) {
                 logger.error("${shardPrefix}Failed to complete flow", e)

@@ -45,6 +45,7 @@ import maestro.orchestra.util.calculateElementRelativePoint
 import maestro.orchestra.util.Env.evaluateScripts
 import maestro.orchestra.yaml.YamlCommandReader
 import maestro.toSwipeDirection
+import maestro.utils.FlowMeta
 import maestro.utils.Insight
 import maestro.utils.Insights
 import maestro.utils.MaestroTimer
@@ -144,17 +145,17 @@ class Orchestra(
 
     private val rawCommandToMetadata = mutableMapOf<MaestroCommand, CommandMetadata>()
 
-    suspend fun runFlow(commands: List<MaestroCommand>): Boolean {
+    suspend fun runFlow(commands: List<MaestroCommand>, flowMeta: FlowMeta): Boolean {
         timeMsOfLastInteraction = System.currentTimeMillis()
 
         val config = YamlCommandReader.getConfig(commands)
 
-        initJsEngine(config)
+        initJsEngine(config, flowMeta)
         initAndroidChromeDevTools(config)
 
         onFlowStart(commands)
 
-        executeDefineVariablesCommands(commands, config)
+        executeDefineVariablesCommands(commands, config, flowMeta)
         // filter out DefineVariablesCommand to not execute it twice
         val filteredCommands = commands.filter { it.asCommand() !is DefineVariablesCommand }
 
@@ -166,6 +167,7 @@ class Orchestra(
                     commands = it,
                     config = config,
                     shouldReinitJsEngine = false,
+                    flowMeta = flowMeta,
                 )
             } ?: true
 
@@ -174,6 +176,7 @@ class Orchestra(
                     commands = filteredCommands,
                     config = config,
                     shouldReinitJsEngine = false,
+                    flowMeta = flowMeta
                 ).also {
                     // close existing screen recording, if left open.
                     screenRecording?.close()
@@ -187,6 +190,7 @@ class Orchestra(
                     commands = it,
                     config = config,
                     shouldReinitJsEngine = false,
+                    flowMeta = flowMeta
                 )
             } ?: true
 
@@ -200,9 +204,10 @@ class Orchestra(
         commands: List<MaestroCommand>,
         config: MaestroConfig? = null,
         shouldReinitJsEngine: Boolean = true,
+        flowMeta: FlowMeta,
     ): Boolean {
         if (shouldReinitJsEngine) {
-            initJsEngine(config)
+            initJsEngine(config, flowMeta)
         }
 
         if (!coroutineContext.isActive) {
@@ -284,7 +289,7 @@ class Orchestra(
     }
 
     @Synchronized
-    private fun initJsEngine(config: MaestroConfig?) {
+    private fun initJsEngine(config: MaestroConfig?, flowMeta: FlowMeta? = null) {
         if (this::jsEngine.isInitialized) {
             jsEngine.close()
         }
@@ -295,7 +300,7 @@ class Orchestra(
             httpClient?.let { RhinoJsEngine(it, platform) } ?: RhinoJsEngine(platform = platform)
         } else {
             // Default to GraalJS for better performance and compatibility
-            httpClient?.let { GraalJsEngine(it, platform) } ?: GraalJsEngine(platform = platform)
+            httpClient?.let { GraalJsEngine(it, platform = platform, flowMeta = flowMeta) } ?: GraalJsEngine(platform = platform, flowMeta = flowMeta)
         }
     }
 
@@ -913,7 +918,7 @@ class Orchestra(
         // Enter environment scope to isolate environment variables for this subflow
         jsEngine.enterEnvScope()
         return try {
-            executeDefineVariablesCommands(commands, config)
+            executeDefineVariablesCommands(commands, config, flowMeta) //TODO: Set this up
             // filter out DefineVariablesCommand to not execute it twice
             val filteredCommands = commands.filter { it.asCommand() !is DefineVariablesCommand }
 
@@ -1452,12 +1457,13 @@ class Orchestra(
         return true
     }
 
-    private suspend fun executeDefineVariablesCommands(commands: List<MaestroCommand>, config: MaestroConfig?) {
+    private suspend fun executeDefineVariablesCommands(commands: List<MaestroCommand>, config: MaestroConfig?, flowMeta: FlowMeta) {
         commands.filter { it.asCommand() is DefineVariablesCommand }.takeIf { it.isNotEmpty() }?.let {
             executeCommands(
                 commands = it,
                 config = config,
-                shouldReinitJsEngine = false
+                shouldReinitJsEngine = false,
+                flowMeta = flowMeta
             )
         }
     }

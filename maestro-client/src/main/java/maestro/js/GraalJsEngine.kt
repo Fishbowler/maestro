@@ -1,5 +1,6 @@
 package maestro.js
 
+import maestro.utils.FlowMeta
 import maestro.utils.HttpClient
 import net.datafaker.Faker
 import net.datafaker.providers.base.AbstractProvider
@@ -30,7 +31,8 @@ class GraalJsEngine(
         writeTimeout = 5.minutes,
         protocols = listOf(Protocol.HTTP_1_1)
     ),
-    platform: String = "unknown",
+    private var platform: String = "unknown",
+    private var flowMeta: FlowMeta? = null,
 ) : JsEngine {
 
     private val openContexts = HashSet<Context>()
@@ -47,8 +49,6 @@ class GraalJsEngine(
     private val fakerPublicClasses = mutableSetOf<Class<*>>() // To avoid re-processing the same class multiple times
 
     private var onLogMessage: (String) -> Unit = {}
-
-    private var platform = platform
 
     override fun close() {
         openContexts.forEach { it.close() }
@@ -128,6 +128,9 @@ class GraalJsEngine(
         context.getBindings("js").putMember("maestro", ProxyObject.fromMap(maestroBinding))
 
         maestroBinding["platform"] = platform
+        maestroBinding["flow"] = flowMeta?.let {
+            mapOf("name" to it.name, "fileName" to it.fileName).let(ProxyObject::fromMap)
+        }
 
         context.eval(
             "js", """
