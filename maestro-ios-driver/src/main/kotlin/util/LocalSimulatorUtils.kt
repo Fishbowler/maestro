@@ -425,9 +425,7 @@ object LocalSimulatorUtils {
             val value = permissionsMap.remove("all")
             allPermissions.forEach {
                 when (value) {
-                    "allow" -> effectivePermissionsMap.putIfAbsent(it, allowValueForPermission(it))
-                    "deny" -> effectivePermissionsMap.putIfAbsent(it, denyValueForPermission(it))
-                    "unset" -> effectivePermissionsMap.putIfAbsent(it, "unset")
+                    "allow", "deny", "unset" -> effectivePermissionsMap.putIfAbsent(it, translatePermissionValueForAppleSimUtils(value))
                     else -> throw IllegalArgumentException("Permission 'all' can be set to 'allow', 'deny' or 'unset', not '$value'")
                 }
             }
@@ -442,7 +440,7 @@ object LocalSimulatorUtils {
 
         val permissionsArgument = effectivePermissionsMap
             .filter { allPermissions.contains(it.key) }
-            .map { "${it.key}=${translatePermissionValue(it.value)}" }
+            .map { "${it.key}=${translatePermissionValueForAppleSimUtils(it.value)}" }
             .joinToString(",")
 
         if (permissionsArgument.isNotEmpty()) {
@@ -484,11 +482,9 @@ object LocalSimulatorUtils {
         val effectivePermissionsMap = mutableMapOf<String, String>()
 
         permissionsMap.remove("all")?.let { value ->
-            val transformedPermissions = simctlPermissions.associateWith { permission ->
+            val transformedPermissions = simctlPermissions.associateWith {
                 val newValue = when (value) {
-                    "allow" -> allowValueForPermission(permission)
-                    "deny" -> denyValueForPermission(permission)
-                    "unset" -> "unset"
+                    "allow","deny","unset" -> translatePermissionValueForSimctl(value)
                     else -> throw IllegalArgumentException("Permission 'all' can be set to 'allow', 'deny', or 'unset', not '$value'")
                 }
                 newValue
@@ -500,104 +496,79 @@ object LocalSimulatorUtils {
         // Write the explicit permissions, potentially overriding the 'all' permissions
         permissionsMap.forEach {
             if (simctlPermissions.contains(it.key)) {
-                effectivePermissionsMap[it.key] = it.value
+                effectivePermissionsMap[it.key] = translatePermissionValueForSimctl(it.value)
             }
         }
 
-        effectivePermissionsMap
-            .forEach {
-                if (simctlPermissions.contains(it.key)) {
-                    when (it.key) {
-                        // TODO: more simctl supported permissions can be migrated here
-                        "location" -> {
-                            setLocationPermission(deviceId, bundleId, it.value)
-                        }
-                    }
+        effectivePermissionsMap.forEach { effectivePermission ->
+            translatePermissionName(
+                name = effectivePermission.key,
+                value = effectivePermission.value
+            ).forEach { simctlPermission ->
+                runCommand(
+                    generateSimctlCommand(deviceId, bundleId, simctlPermission, effectivePermission.value)
+                )
+            }
+        }
+    }
+
+    internal fun generateSimctlCommand(
+        deviceId: String,
+        bundleId: String,
+        permission: String,
+        value: String,
+    ): List<String> {
+        return listOf(
+            "xcrun",
+            "simctl",
+            "privacy",
+            deviceId,
+            translatePermissionValueForSimctl(value = value),
+            permission,
+            bundleId
+        )
+    }
+
+    private fun translatePermissionName(name: String, value: String): List<String> {
+        return when (name) {
+            "calendar" -> listOf("calendar")
+            "camera" -> listOf("camera")
+            "contacts" -> listOf("contacts")
+            "location" ->
+                when(value) {
+                    "always" -> listOf("location-always")
+                    "inuse" -> listOf("location")
+                    "never" -> listOf("location-always", "location")
+                    "unset" -> listOf("location-always", "location")
+                    else -> throw IllegalArgumentException("Value '$value' not supported by location permission")
                 }
-            }
-    }
-
-    private fun setLocationPermission(deviceId: String, bundleId: String, value: String) {
-        when (value) {
-            "always" -> {
-                runCommand(
-                    listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "grant",
-                        "location-always",
-                        bundleId
-                    )
-                )
-            }
-
-            "inuse" -> {
-                runCommand(
-                    listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "grant",
-                        "location",
-                        bundleId
-                    )
-                )
-            }
-
-            "never" -> {
-                runCommand(
-                    listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "revoke",
-                        "location-always",
-                        bundleId
-                    )
-                )
-            }
-
-            "unset" -> {
-                runCommand(
-                    listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "reset",
-                        "location-always",
-                        bundleId
-                    )
-                )
-            }
-
-            else -> throw IllegalArgumentException("wrong argument value '$value' was provided for 'location' permission")
+            "medialibrary" -> listOf("photos")
+            "microphone" -> listOf("microphone")
+            "motion" -> listOf("motion")
+            "photos" -> listOf("photos")
+            "reminders" -> listOf("reminders")
+            "siri" -> listOf("siri")
+            else -> throw IllegalArgumentException("Permission '$name' isn't supported by simctl")
         }
     }
 
-    private fun translatePermissionValue(value: String): String {
+    private fun translatePermissionValueForSimctl(value: String): String {
         return when (value) {
-            "allow" -> "YES"
-            "deny" -> "NO"
+            "allow" -> "grant"
+            "always" -> "grant"
+            "inuse" -> "grant"
+            "deny" -> "revoke"
+            "never" -> "revoke"
+            "unset" -> "reset"
             else -> value
         }
     }
 
-    private fun allowValueForPermission(permission: String): String {
-        return when (permission) {
-            "location" -> "always"
-            else -> "YES"
-        }
-    }
-
-    private fun denyValueForPermission(permission: String): String {
-        return when (permission) {
-            "location" -> "never"
-            else -> "NO"
+    private fun translatePermissionValueForAppleSimUtils(value: String): String {
+        return when (value) {
+            "allow" -> "YES"
+            "deny" -> "NO"
+            else -> value
         }
     }
 
