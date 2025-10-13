@@ -25,6 +25,14 @@ object Env {
             }
     }
 
+    fun String.parseBoolean(): Boolean {
+        return when (this.lowercase()) {
+            "true" -> true
+            "false" -> false
+            else -> throw IllegalArgumentException("Invalid boolean value: $this")
+        }
+    }
+
     fun List<MaestroCommand>.withEnv(env: Map<String, String>): List<MaestroCommand> =
         if (env.isEmpty()) this
         else listOf(MaestroCommand(DefineVariablesCommand(env))) + this

@@ -230,15 +230,15 @@ internal class YamlCommandReaderTest {
             // Taps
             TapOnElementCommand(
                 selector = ElementSelector(idRegex = "foo"),
-                retryIfNoChange = false,
-                waitUntilVisible = false,
+                retryIfNoChange = null,
+                waitUntilVisible = null,
                 longPress = false,
                 label = "Tap on the important button"
             ),
             TapOnElementCommand(
                 selector = ElementSelector(idRegex = "foo"),
-                retryIfNoChange = false,
-                waitUntilVisible = false,
+                retryIfNoChange = null,
+                waitUntilVisible = null,
                 longPress = false,
                 repeat = TapRepeat(
                     repeat = 2,
@@ -248,8 +248,8 @@ internal class YamlCommandReaderTest {
             ),
             TapOnElementCommand(
                 selector = ElementSelector(idRegex = "foo"),
-                retryIfNoChange = false,
-                waitUntilVisible = false,
+                retryIfNoChange = null,
+                waitUntilVisible = null,
                 longPress = true,
                 label = "Press and hold the important button"
             ),
@@ -437,8 +437,8 @@ internal class YamlCommandReaderTest {
                     MaestroCommand(
                         command = TapOnElementCommand(
                             selector = ElementSelector(idRegex = "foo"),
-                            retryIfNoChange = false,
-                            waitUntilVisible = false,
+                            retryIfNoChange = null,
+                            waitUntilVisible = null,
                             longPress = false,
                             label = "Tap on the important button"
                         )
@@ -446,8 +446,8 @@ internal class YamlCommandReaderTest {
                     MaestroCommand(
                         command = TapOnElementCommand(
                             selector = ElementSelector(idRegex = "bar"),
-                            retryIfNoChange = false,
-                            waitUntilVisible = false,
+                            retryIfNoChange = null,
+                            waitUntilVisible = null,
                             longPress = false,
                             label = "Tap on the other important button"
                         )
@@ -496,22 +496,22 @@ internal class YamlCommandReaderTest {
                 ElementSelector(
                     textRegex = "Hello",
                 ),
-                retryIfNoChange = false,
-                waitUntilVisible = false,
+                retryIfNoChange = null,
+                waitUntilVisible = null,
                 longPress = false
             ),
             TapOnElementCommand(
                 selector = ElementSelector(textRegex = "Hello"),
                 repeat = TapRepeat(2, TapOnElementCommand.DEFAULT_REPEAT_DELAY),
-                retryIfNoChange = false,
-                waitUntilVisible = false,
+                retryIfNoChange = null,
+                waitUntilVisible = null,
                 longPress = false
             ),
             TapOnElementCommand(
                 selector = ElementSelector(textRegex = "Hello"),
                 longPress = true,
-                retryIfNoChange = false,
-                waitUntilVisible = false
+                retryIfNoChange = null,
+                waitUntilVisible = "false"
             ),
             AssertConditionCommand(
                 condition = Condition(
@@ -597,9 +597,9 @@ internal class YamlCommandReaderTest {
         // Then: Verify the real command structure
         assertThat(tapCommand.selector.textRegex).isEqualTo("Submit")
         assertThat(tapCommand.relativePoint).isEqualTo("50%, 90%")
-        assertThat(tapCommand.retryIfNoChange).isFalse() // YAML parsing sets default values
-        assertThat(tapCommand.waitUntilVisible).isFalse() // YAML parsing sets default values
-        assertThat(tapCommand.longPress).isFalse() // YAML parsing sets default values
+        assertThat(tapCommand.retryIfNoChange).isNull() // YAML parsing does not set default for nullable String
+        assertThat(tapCommand.waitUntilVisible).isNull() // YAML parsing does not set default for nullable String
+        assertThat(tapCommand.longPress).isNull() // YAML parsing does not set default for nullable Boolean
         assertThat(tapCommand.optional).isFalse()
 
         // Verify the original description includes the point
@@ -655,7 +655,7 @@ internal class YamlCommandReaderTest {
 
         // Then: Verify the real command structure
         assertThat(tapCommand.selector.textRegex).isEqualTo("Submit")
-        assertThat(tapCommand.selector.enabled).isTrue()
+        assertThat(tapCommand.selector.enabled).isEqualTo("true")
         assertThat(tapCommand.relativePoint).isEqualTo("25%, 75%")
         assertThat(tapCommand.originalDescription).isEqualTo("Tap on \"Submit\", enabled at 25%, 75%")
     }
@@ -698,8 +698,8 @@ internal class YamlCommandReaderTest {
 
         // Then: Verify the real command structure
         assertThat(pointCommand.point).isEqualTo("50%, 90%")
-        assertThat(pointCommand.retryIfNoChange).isFalse() // YAML parsing sets default values
-        assertThat(pointCommand.longPress).isFalse() // YAML parsing sets default values
+        assertThat(pointCommand.retryIfNoChange).isNull() // YAML parsing does not set defaults for nullable fields
+        assertThat(pointCommand.longPress).isFalse() // Default value from tapCommand function parameter
         assertThat(pointCommand.originalDescription).isEqualTo("Tap on point (50%, 90%)")
     }
 
@@ -729,9 +729,9 @@ internal class YamlCommandReaderTest {
         assertThat(tapCommand.repeat).isNotNull()
         assertThat(tapCommand.repeat?.repeat).isEqualTo(3)
         assertThat(tapCommand.repeat?.delay).isEqualTo(100L)
-        assertThat(tapCommand.retryIfNoChange).isFalse()
-        assertThat(tapCommand.waitUntilVisible).isFalse()
-        assertThat(tapCommand.longPress).isFalse()
+        assertThat(tapCommand.retryIfNoChange).isNull()
+        assertThat(tapCommand.waitUntilVisible).isNull()
+        assertThat(tapCommand.longPress).isNull()
         assertThat(tapCommand.optional).isFalse()
 
         // Verify the original description includes both the point and repeat info
@@ -751,9 +751,9 @@ internal class YamlCommandReaderTest {
         assertThat(tapCommand.repeat).isNotNull()
         assertThat(tapCommand.repeat?.repeat).isEqualTo(2)
         assertThat(tapCommand.repeat?.delay).isEqualTo(TapOnElementCommand.DEFAULT_REPEAT_DELAY)
-        assertThat(tapCommand.retryIfNoChange).isFalse()
-        assertThat(tapCommand.waitUntilVisible).isFalse()
-        assertThat(tapCommand.longPress).isFalse()
+        assertThat(tapCommand.retryIfNoChange).isNull()
+        assertThat(tapCommand.waitUntilVisible).isNull()
+        assertThat(tapCommand.longPress).isNull()
         assertThat(tapCommand.optional).isFalse()
 
         // Verify the original description includes both the point and double-tap info

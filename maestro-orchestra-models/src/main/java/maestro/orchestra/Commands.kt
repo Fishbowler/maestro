@@ -282,8 +282,8 @@ data class PasteTextCommand(
 
 data class TapOnElementCommand(
     val selector: ElementSelector,
-    val retryIfNoChange: Boolean? = null,
-    val waitUntilVisible: Boolean? = null,
+    val retryIfNoChange: String? = null, // String to allow script evaluation, converted to Boolean later
+    val waitUntilVisible: String? = null, // String to allow script evaluation, converted to Boolean later
     val longPress: Boolean? = null,
     val repeat: TapRepeat? = null,
     val waitToSettleTimeoutMs: Int? = null,
@@ -294,14 +294,16 @@ data class TapOnElementCommand(
 
     override val originalDescription: String
         get() {
-            val optional = if (optional || selector.optional) "(Optional) " else ""
+            val optionalPrefix = if (optional || selector.optional) "(Optional) " else ""
             val pointInfo = relativePoint?.let { " at $it" } ?: ""
-            return "${tapOnDescription(longPress, repeat)} on $optional${selector.description()}$pointInfo"
+            return "${tapOnDescription(longPress, repeat)} on $optionalPrefix${selector.description()}$pointInfo"
         }
 
     override fun evaluateScripts(jsEngine: JsEngine): TapOnElementCommand {
         return copy(
             selector = selector.evaluateScripts(jsEngine),
+            retryIfNoChange = retryIfNoChange?.evaluateScripts(jsEngine),
+            waitUntilVisible = waitUntilVisible?.evaluateScripts(jsEngine),
             label = label?.evaluateScripts(jsEngine)
         )
     }

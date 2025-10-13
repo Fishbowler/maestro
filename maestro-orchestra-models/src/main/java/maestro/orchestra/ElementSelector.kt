@@ -34,12 +34,12 @@ data class ElementSelector(
     val containsDescendants: List<ElementSelector>? = null,
     val traits: List<ElementTrait>? = null,
     val index: String? = null,
-    val enabled: Boolean? = null,
+    val enabled: String? = null, // String to allow script evaluation, converted to Boolean later
     @Deprecated("This is a deprecated field, please use the optional in commands interface")
     val optional: Boolean = false,
-    val selected: Boolean? = null,
-    val checked: Boolean? = null,
-    val focused: Boolean? = null,
+    val selected: String? = null, // String to allow script evaluation, converted to Boolean later
+    val checked: String? = null, // String to allow script evaluation, converted to Boolean later
+    val focused: String? = null, // String to allow script evaluation, converted to Boolean later
     val childOf: ElementSelector? = null,
     val css: String? = null,
 ) {
@@ -61,6 +61,10 @@ data class ElementSelector(
             containsChild = containsChild?.evaluateScripts(jsEngine),
             containsDescendants = containsDescendants?.map { it.evaluateScripts(jsEngine) },
             index = index?.evaluateScripts(jsEngine),
+            enabled = enabled?.evaluateScripts(jsEngine),
+            selected = selected?.evaluateScripts(jsEngine),
+            checked = checked?.evaluateScripts(jsEngine),
+            focused = focused?.evaluateScripts(jsEngine),
             childOf = childOf?.evaluateScripts(jsEngine),
             css = css?.evaluateScripts(jsEngine),
         )
@@ -78,9 +82,11 @@ data class ElementSelector(
         }
 
         enabled?.let {
-            when(enabled){
+            val boolValue = it.toBooleanStrictOrNull()
+            when(boolValue){
                 true -> descriptions.add("enabled")
                 false -> descriptions.add("disabled")
+                null -> descriptions.add("enabled: $it")
             }
         }
 
@@ -129,16 +135,29 @@ data class ElementSelector(
         }
 
         selected?.let {
-            when(selected){
+            val boolValue = it.toBooleanStrictOrNull()
+            when(boolValue){
                 true -> descriptions.add("selected")
                 false -> descriptions.add("not selected")
+                null -> descriptions.add("selected: $it")
+            }
+        }
+
+        checked?.let {
+            val boolValue = it.toBooleanStrictOrNull()
+            when(boolValue){
+                true -> descriptions.add("checked")
+                false -> descriptions.add("not checked")
+                null -> descriptions.add("checked: $it")
             }
         }
 
         focused?.let {
-            when(focused){
+            val boolValue = it.toBooleanStrictOrNull()
+            when(boolValue){
                 true -> descriptions.add("focused")
                 false -> descriptions.add("not focused")
+                null -> descriptions.add("focused: $it")
             }
         }
 

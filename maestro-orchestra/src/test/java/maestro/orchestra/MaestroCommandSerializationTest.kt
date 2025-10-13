@@ -17,8 +17,8 @@ internal class MaestroCommandSerializationTest {
         val command = MaestroCommand(
             command = TapOnElementCommand(
                 selector = ElementSelector(textRegex = "[A-f0-9]"),
-                retryIfNoChange = false,
-                waitUntilVisible = true,
+                retryIfNoChange = "false",
+                waitUntilVisible = "true",
                 longPress = false,
                 label = "My Tap"
             )
@@ -37,8 +37,8 @@ internal class MaestroCommandSerializationTest {
                   "textRegex" : "[A-f0-9]",
                   "optional" : false
                 },
-                "retryIfNoChange" : false,
-                "waitUntilVisible" : true,
+                "retryIfNoChange" : "false",
+                "waitUntilVisible" : "true",
                 "longPress" : false,
                 "label" : "My Tap",
                 "optional" : false
@@ -58,8 +58,8 @@ internal class MaestroCommandSerializationTest {
         val command = MaestroCommand(
             command = TapOnElementCommand(
                 selector = ElementSelector(textRegex = "Submit"),
-                retryIfNoChange = false,
-                waitUntilVisible = true,
+                retryIfNoChange = "false",
+                waitUntilVisible = "true",
                 longPress = false,
                 relativePoint = "50%, 90%",
                 label = "Tap Submit Button"
@@ -79,8 +79,8 @@ internal class MaestroCommandSerializationTest {
                   "textRegex" : "Submit",
                   "optional" : false
                 },
-                "retryIfNoChange" : false,
-                "waitUntilVisible" : true,
+                "retryIfNoChange" : "false",
+                "waitUntilVisible" : "true",
                 "longPress" : false,
                 "relativePoint" : "50%, 90%",
                 "label" : "Tap Submit Button",

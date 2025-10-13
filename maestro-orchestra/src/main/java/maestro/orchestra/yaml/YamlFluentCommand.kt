@@ -67,6 +67,7 @@ import maestro.orchestra.SwipeCommand
 import maestro.orchestra.TakeScreenshotCommand
 import maestro.orchestra.TapOnElementCommand
 import maestro.orchestra.TapOnPointV2Command
+import maestro.orchestra.util.Env.parseBoolean
 import maestro.orchestra.ToggleAirplaneModeCommand
 import maestro.orchestra.TravelCommand
 import maestro.orchestra.WaitForAnimationToEndCommand
@@ -711,8 +712,8 @@ data class YamlFluentCommand(
         longPress: Boolean = false,
         tapRepeat: TapRepeat? = null
     ): MaestroCommand {
-        val retryIfNoChange = (tapOn as? YamlElementSelector)?.retryTapIfNoChange ?: false
-        val waitUntilVisible = (tapOn as? YamlElementSelector)?.waitUntilVisible ?: false
+        val retryIfNoChange = (tapOn as? YamlElementSelector)?.retryTapIfNoChange?.toStringValue()
+        val waitUntilVisible = (tapOn as? YamlElementSelector)?.waitUntilVisible?.toStringValue()
         val point = (tapOn as? YamlElementSelector)?.point
         val label = (tapOn as? YamlElementSelector)?.label
         val optional = (tapOn as? YamlElementSelector)?.optional ?: false
@@ -752,7 +753,7 @@ data class YamlFluentCommand(
                 MaestroCommand(
                     TapOnPointV2Command(
                         point = point,
-                        retryIfNoChange = retryIfNoChange,
+                        retryIfNoChange = retryIfNoChange?.let { try { it.parseBoolean() } catch (e: IllegalArgumentException) { null } },
                         longPress = longPress,
                         repeat = repeat,
                         waitToSettleTimeoutMs = waitToSettleTimeoutMs,
@@ -913,10 +914,10 @@ data class YamlFluentCommand(
                 ?.split(" ")
                 ?.map { ElementTrait.valueOf(it.replace('-', '_').uppercase()) },
             index = selector.index,
-            enabled = selector.enabled,
-            selected = selector.selected,
-            checked = selector.checked,
-            focused = selector.focused,
+            enabled = selector.enabled?.toStringValue(),
+            selected = selector.selected?.toStringValue(),
+            checked = selector.checked?.toStringValue(),
+            focused = selector.focused?.toStringValue(),
             childOf = selector.childOf?.let { toElementSelector(it) },
             css = selector.css,
         )

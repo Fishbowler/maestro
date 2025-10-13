@@ -43,6 +43,7 @@ import maestro.orchestra.filter.TraitFilters
 import maestro.orchestra.geo.Traveller
 import maestro.orchestra.util.calculateElementRelativePoint
 import maestro.orchestra.util.Env.evaluateScripts
+import maestro.orchestra.util.Env.parseBoolean
 import maestro.orchestra.yaml.YamlCommandReader
 import maestro.toSwipeDirection
 import maestro.utils.Insight
@@ -321,8 +322,8 @@ class Orchestra(
             is TapOnElementCommand -> {
                 tapOnElement(
                     command = command,
-                    retryIfNoChange = command.retryIfNoChange ?: false,
-                    waitUntilVisible = command.waitUntilVisible ?: false,
+                    retryIfNoChange = command.retryIfNoChange?.let { it.parseBoolean() } ?: false,
+                    waitUntilVisible = command.waitUntilVisible?.let { it.parseBoolean() } ?: false,
                     config = config
                 )
             }
@@ -1304,42 +1305,46 @@ class Orchestra(
 
         selector.enabled
             ?.let {
-                descriptions += if (it) {
+                val boolValue = try { it.parseBoolean() } catch (e: IllegalArgumentException) { throw IllegalArgumentException("enabled must be a boolean value, got: $it") }
+                descriptions += if (boolValue) {
                     "Enabled"
                 } else {
                     "Disabled"
                 }
-                basicFilters += Filters.enabled(it)
+                basicFilters += Filters.enabled(boolValue)
             }
 
         selector.selected
             ?.let {
-                descriptions += if (it) {
+                val boolValue = try { it.parseBoolean() } catch (e: IllegalArgumentException) { throw IllegalArgumentException("selected must be a boolean value, got: $it") }
+                descriptions += if (boolValue) {
                     "Selected"
                 } else {
                     "Not selected"
                 }
-                basicFilters += Filters.selected(it)
+                basicFilters += Filters.selected(boolValue)
             }
 
         selector.checked
             ?.let {
-                descriptions += if (it) {
+                val boolValue = try { it.parseBoolean() } catch (e: IllegalArgumentException) { throw IllegalArgumentException("checked must be a boolean value, got: $it") }
+                descriptions += if (boolValue) {
                     "Checked"
                 } else {
                     "Not checked"
                 }
-                basicFilters += Filters.checked(it)
+                basicFilters += Filters.checked(boolValue)
             }
 
         selector.focused
             ?.let {
-                descriptions += if (it) {
+                val boolValue = try { it.parseBoolean() } catch (e: IllegalArgumentException) { throw IllegalArgumentException("focused must be a boolean value, got: $it") }
+                descriptions += if (boolValue) {
                     "Focused"
                 } else {
                     "Not focused"
                 }
-                basicFilters += Filters.focused(it)
+                basicFilters += Filters.focused(boolValue)
             }
 
         selector.css
