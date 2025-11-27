@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: npm
+    directory: /maestro-studio/web
+    schedule:
+      interval: "daily"
