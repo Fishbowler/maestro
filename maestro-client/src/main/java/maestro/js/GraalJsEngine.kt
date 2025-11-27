@@ -11,8 +11,12 @@ import org.graalvm.polyglot.Source
 import org.graalvm.polyglot.Value
 import org.graalvm.polyglot.proxy.ProxyObject
 import java.io.ByteArrayOutputStream
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.logging.Handler
 import java.util.logging.LogRecord
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 import kotlin.time.Duration.Companion.minutes
 
 private val NULL_HANDLER = object : Handler() {
@@ -30,12 +34,22 @@ class GraalJsEngine(
         writeTimeout = 5.minutes,
         protocols = listOf(Protocol.HTTP_1_1)
     ),
-    platform: String = "unknown",
+    private val platform: String = "unknown",
+    disableSSLVerification: Boolean = false,
 ) : JsEngine {
 
     private val openContexts = HashSet<Context>()
 
-    private val httpBinding = GraalJsHttp(httpClient)
+    private val httpBinding = GraalJsHttp(
+        if (disableSSLVerification) httpClient.newBuilder().apply {
+            // Replace SSL settings to disable verification
+            val trustAllCerts = arrayOf(TrustAllCerts())
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(null, trustAllCerts, SecureRandom())
+            sslSocketFactory(sslContext.socketFactory, trustAllCerts[0])
+            hostnameVerifier { _, _ -> true }
+        }.build() else httpClient
+    )
     private val outputBinding = HashMap<String, Any>()
     private val maestroBinding = HashMap<String, Any?>()
     private val envBinding = HashMap<String, String>()
@@ -47,8 +61,6 @@ class GraalJsEngine(
     private val fakerPublicClasses = mutableSetOf<Class<*>>() // To avoid re-processing the same class multiple times
 
     private var onLogMessage: (String) -> Unit = {}
-
-    private var platform = platform
 
     override fun close() {
         openContexts.forEach { it.close() }
@@ -183,5 +195,11 @@ class GraalJsEngine(
             }
         }
         return this
+    }
+
+    private class TrustAllCerts : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+        override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
     }
 }

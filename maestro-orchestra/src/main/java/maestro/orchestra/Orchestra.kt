@@ -27,9 +27,7 @@ import maestro.Filters.asFilter
 import maestro.FindElementResult
 import maestro.Maestro
 import maestro.MaestroException
-import maestro.Point
 import maestro.ScreenRecording
-import maestro.UiElement
 import maestro.ViewHierarchy
 import maestro.ai.cloud.Defect
 import maestro.ai.CloudAIPredictionEngine
@@ -59,7 +57,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.lang.Long.max
 import java.nio.file.Path
-import java.util.logging.Filter
 import kotlin.coroutines.coroutineContext
 
 // TODO(bartkepacia): Use this in onCommandGeneratedOutput.
@@ -132,6 +129,8 @@ class Orchestra(
     private val apiKey: String? = null,
     private val AIPredictionEngine: AIPredictionEngine? = apiKey?.let { CloudAIPredictionEngine(it) },
     private val flowController: FlowController = DefaultFlowController(),
+    // Optional workspace-level configuration to allow features like disabling SSL verification
+    private val workspaceConfig: WorkspaceConfig? = null,
 ) {
 
     private lateinit var jsEngine: JsEngine
@@ -291,11 +290,13 @@ class Orchestra(
         val isRhinoExplicitlyRequested = config?.ext?.get("jsEngine") == "rhino"
                 
         val platform = maestro.cachedDeviceInfo.platform.toString().lowercase()
+        val disableSSL = workspaceConfig?.disableSSLVerification == true
+
         jsEngine = if (isRhinoExplicitlyRequested) {
             httpClient?.let { RhinoJsEngine(it, platform) } ?: RhinoJsEngine(platform = platform)
         } else {
             // Default to GraalJS for better performance and compatibility
-            httpClient?.let { GraalJsEngine(it, platform) } ?: GraalJsEngine(platform = platform)
+            httpClient?.let { GraalJsEngine(it, platform, disableSSL) } ?: GraalJsEngine(platform = platform, disableSSLVerification = disableSSL)
         }
     }
 
