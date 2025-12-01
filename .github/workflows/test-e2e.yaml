@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: ${{ matrix.java-version }}
@@ -33,14 +33,14 @@ jobs:
         run: ./gradlew :maestro-cli:distZip
 
       - name: Upload zipped Maestro CLI artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: maestro-cli-jdk${{ matrix.java-version }}-run_id${{ github.run_id }}
           path: maestro-cli/build/distributions/maestro.zip
           retention-days: 1
 
       - name: Upload build/Products to artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build__Products-jdk${{ matrix.java-version }}
           path: build/Products
@@ -53,21 +53,21 @@ jobs:
 
     steps:
       - name: Clone repository (only needed for the e2e directory)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
-          java-version: 11
+          java-version: 17
 
       - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
-          name: maestro-cli-jdk11-run_id${{ github.run_id }}
+          name: maestro-cli-jdk17-run_id${{ github.run_id }}
 
       - name: Add Maestro CLI executable to PATH
         run: |
@@ -85,10 +85,10 @@ jobs:
         run: ./run_tests web
 
       - name: Upload ~/.maestro artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
-          name: maestro-root-dir-android
+          name: maestro-root-dir-web
           path: ~/.maestro
           retention-days: 7
           include-hidden-files: true
@@ -114,16 +114,16 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Clone repository (only needed for the e2e directory)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 17
 
       - name: Download Maestro build from previous job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: maestro-cli-jdk17-run_id${{ github.run_id }}
 
@@ -234,7 +234,7 @@ jobs:
           adb pull /sdcard/screenrecord.mp4 ~/screenrecord.mp4
 
       - name: Upload ~/.maestro artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: maestro-root-dir-android
@@ -243,7 +243,7 @@ jobs:
           include-hidden-files: true
 
       - name: Upload screen recording of AVD
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: maestro-screenrecord-android.mp4
@@ -263,16 +263,16 @@ jobs:
 
     steps:
       - name: Clone repository (only needed for the e2e directory)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 8
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: maestro-cli-jdk17-run_id${{ github.run_id }}
 
@@ -315,7 +315,7 @@ jobs:
         run: kill -SIGINT "$(cat ~/screenrecord.pid)"
 
       - name: Upload ~/.maestro artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: maestro-root-dir-ios
@@ -324,7 +324,7 @@ jobs:
           include-hidden-files: true
 
       - name: Upload xc test runner logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: xctest_runner_logs
@@ -333,7 +333,7 @@ jobs:
           include-hidden-files: true
 
       - name: Upload screen recording of AVD
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: maestro-screenrecord-ios.mp4
@@ -349,21 +349,21 @@ jobs:
 
     steps:
       - name: Clone repository (only needed for the e2e directory)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: 8
 
       - name: Download Maestro artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: maestro-cli-jdk17-run_id${{ github.run_id }}
 
       - name: Download build/Products artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: build__Products-jdk11
           path: build/Products
@@ -389,7 +389,7 @@ jobs:
         run: ./maestro-ios-xctest-runner/test-maestro-ios-runner.sh
 
       - name: Upload xc test runner logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: success() || failure()
         with:
           name: test-ios-xctest-runner__xctest_runner_logs
