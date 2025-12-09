@@ -1076,24 +1076,30 @@ data class StopRecordingCommand(
     }
 }
 
-enum class AirplaneValue {
-    Enable,
-    Disable,
-}
-
 data class SetAirplaneModeCommand(
-    val value: AirplaneValue,
+    val value: String,
     override val label: String? = null,
     override val optional: Boolean = false,
 ) : Command {
     override val originalDescription: String
         get() = when (value) {
-            AirplaneValue.Enable -> "Enable airplane mode"
-            AirplaneValue.Disable -> "Disable airplane mode"
+            "enable" -> "Enable airplane mode"
+            "disable" -> "Disable airplane mode"
+            else -> "Set airplane mode to $value"
         }
 
     override fun evaluateScripts(jsEngine: JsEngine): Command {
-        return this
+        val enabledSynonyms = listOf<String>("enable", "enabled", "on")
+        val disabledSynonyms = listOf<String>("disable", "disabled", "off")
+
+        val evaluatedValue = value.evaluateScripts(jsEngine).lowercase()
+
+        if (!enabledSynonyms.contains(evaluatedValue) && !disabledSynonyms.contains(evaluatedValue)) value.evaluateScripts(jsEngine)
+
+        return copy(
+            value = value.evaluateScripts(jsEngine),
+            label = label?.evaluateScripts(jsEngine)
+        )
     }
 }
 

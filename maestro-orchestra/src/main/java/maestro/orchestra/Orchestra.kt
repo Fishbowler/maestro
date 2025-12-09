@@ -378,10 +378,19 @@ class Orchestra(
     }
 
     private fun setAirplaneMode(command: SetAirplaneModeCommand): Boolean {
-        when (command.value) {
-            AirplaneValue.Enable -> maestro.setAirplaneModeState(true)
-            AirplaneValue.Disable -> maestro.setAirplaneModeState(false)
+        val enabledSynonyms = listOf<String>("enable", "enabled", "on")
+        val disabledSynonyms = listOf<String>("disable", "disabled", "off")
+
+        val desiredState = command.value.lowercase()
+
+        if (enabledSynonyms.contains(desiredState)) {
+            maestro.setAirplaneModeState(true)
+        } else if (disabledSynonyms.contains(desiredState)) {
+            maestro.setAirplaneModeState(false)
+        } else {
+            //Throw?
         }
+
 
         return true
     }
